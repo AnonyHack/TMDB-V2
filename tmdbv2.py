@@ -657,14 +657,13 @@ async def send_movie_response(update, movie, from_favorites=False):
 async def handle_favorite_callback(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle favorite button clicks"""
     query = update.callback_query
-    await query.answer()
     
     try:
         movie_id = query.data.split('_')[1]
         movie = await get_movie_by_id(movie_id)
         
         if not movie:
-            await query.answer("Mᴏᴠɪᴇ Nᴏᴛ Fᴏᴜɴᴅ!")
+            await query.answer("Movie Not Found!", show_alert=True)
             return
             
         success = add_favorite(query.from_user.id, movie_id, movie["title"])
@@ -675,30 +674,32 @@ async def handle_favorite_callback(update: Update, context: ContextTypes.DEFAULT
             
     except Exception as e:
         logger.error(f"Error in handle_favorite_callback: {str(e)}")
-        await query.answer("❌ Eʀʀᴏʀ Sᴀᴠɪɴɢ Tᴏ Fᴀᴠᴏʀɪᴛᴇꜱ", show_alert=True)
+        await query.answer("❌ Error saving to favorites", show_alert=True)
 
 async def handle_remove_favorite(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle remove from favorites button clicks"""
     query = update.callback_query
-    await query.answer()
     
     try:
         movie_id = query.data.split('_')[1]
         movie = await get_movie_by_id(movie_id)
         
         if not movie:
-            await query.answer("Mᴏᴠɪᴇ Nᴏᴛ Fᴏᴜɴᴅ!")
+            await query.answer("Movie Not Found!", show_alert=True)
             return
             
         removed = remove_favorite(query.from_user.id, movie_id)
         if removed:
-            # Edit the message to show the "add to favorites" button instead
-            keyboard = [[InlineKeyboardButton(
-                text="❤️ Sᴀᴠᴇ Tᴏ Fᴀᴠᴏʀɪᴛᴇꜱ",
-                callback_data=f"fav_{movie['id']}"
-            )]]
+            # Create the new keyboard
+            keyboard = [
+                [InlineKeyboardButton("❤️ Save To Favorites", callback_data=f"fav_{movie['id']}")],
+                [InlineKeyboardButton("📢 Join Main Channel", url="https://t.me/Freenethubz")],
+                [InlineKeyboardButton("📢 Creator Channel", url="https://t.me/Megahubbots")]
+            ]
             
-            await query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(keyboard))
+            await query.edit_message_reply_markup(
+                reply_markup=InlineKeyboardMarkup(keyboard)
+            )
             await query.answer(f"❌ {movie['title']} removed from favorites!", show_alert=True)
         else:
             await query.answer(f"{movie['title']} wasn't in your favorites!", show_alert=True)
