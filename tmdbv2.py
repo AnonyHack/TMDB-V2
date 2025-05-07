@@ -669,13 +669,13 @@ async def handle_favorite_callback(update: Update, context: ContextTypes.DEFAULT
             
         success = add_favorite(query.from_user.id, movie_id, movie["title"])
         if success:
-            await query.answer(f"❤️ {movie['title']} added to favorites!")
+            await query.answer(f"❤️ {movie['title']} added to favorites!", show_alert=True)
         else:
-            await query.answer(f"❤️ {movie['title']} is already in favorites!")
+            await query.answer(f"❤️ {movie['title']} is already in favorites!", show_alert=True)
             
     except Exception as e:
         logger.error(f"Error in handle_favorite_callback: {str(e)}")
-        await query.answer("❌ Eʀʀᴏʀ Sᴀᴠɪɴɢ Tᴏ Fᴀᴠᴏʀɪᴛᴇꜱ")
+        await query.answer("❌ Eʀʀᴏʀ Sᴀᴠɪɴɢ Tᴏ Fᴀᴠᴏʀɪᴛᴇꜱ", show_alert=True)
 
 async def handle_remove_favorite(update: Update, context: ContextTypes.DEFAULT_TYPE):
     """Handle remove from favorites button clicks"""
@@ -699,13 +699,13 @@ async def handle_remove_favorite(update: Update, context: ContextTypes.DEFAULT_T
             )]]
             
             await query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(keyboard))
-            await query.answer(f"❌ {movie['title']} removed from favorites!")
+            await query.answer(f"❌ {movie['title']} removed from favorites!", show_alert=True)
         else:
-            await query.answer(f"{movie['title']} wasn't in your favorites!")
+            await query.answer(f"{movie['title']} wasn't in your favorites!", show_alert=True)
             
     except Exception as e:
         logger.error(f"Error in handle_remove_favorite: {str(e)}")
-        await query.answer("❌ Error removing from favorites")
+        await query.answer("❌ Error removing from favorites", show_alert=True)
 
 # Add handlers to the application
 def main():
