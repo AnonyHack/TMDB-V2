@@ -36,7 +36,7 @@ logger = logging.getLogger(__name__)
 CONFIG = {
     'token': os.getenv('TELEGRAM_BOT_TOKEN'),
     'admin_ids': [int(id) for id in os.getenv('ADMIN_IDS', '').split(',') if id],
-    'tmdb_api_key': os.getenv('TMDB_API_KEY', 'd6b0fe020db56e35227657fd8c0afd5c')
+    'tmdb_api_key': os.getenv('TMDB_API_KEY', '')
 }
 
 # MongoDB connection
@@ -59,9 +59,9 @@ if admins_collection.count_documents({}) == 0 and os.getenv('ADMIN_IDS'):
         )
 
 # Webhook configuration
-PORT = 10000
+PORT = int(os.getenv('PORT', 10000))  # Use the PORT environment variable provided by Render
 WEBHOOK_PATH = "/webhook"
-WEBHOOK_SECRET = os.getenv('WEBHOOK_SECRET', 'YourSecretToken123')
+WEBHOOK_SECRET = os.getenv('WEBHOOK_SECRET', '')
 WEBHOOK_URL = os.getenv('WEBHOOK_URL', '') + WEBHOOK_PATH
 
 # ==============================================
@@ -731,8 +731,16 @@ def main():
     # Inline query handler
     application.add_handler(InlineQueryHandler(handle_inline_query))
     
-    # Start the bot
-    application.run_polling()
+    # Start the bot with webhook if running on Render
+    if os.getenv('RENDER'):
+        application.run_webhook(
+            listen="0.0.0.0",  # Listen on all interfaces
+            port=PORT,         # Bind to the PORT environment variable
+            url_path=WEBHOOK_PATH,
+            webhook_url=WEBHOOK_URL
+        )
+    else:
+        application.run_polling()
 
 if __name__ == "__main__":
     main()
